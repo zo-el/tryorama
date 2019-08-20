@@ -10,10 +10,13 @@ export const simpleExecutor = (run: Runner, f, desc) => {
 }
 
 export const tapeExecutor = tape => (run: Runner, f, desc) => new Promise((resolve, reject) => {
+  console.debug('invoking tapeExecutor: ', desc)
   if (f.length !== 3) {
-    reject("tapeMiddleware requires scenario functions to take 3 arguments, please check your scenario definitions.")
+    const err = "tapeMiddleware requires scenario functions to take 3 arguments, please check your scenario definitions."
+    reject(err)
   }
   tape(desc, t => {
+    console.debug('executing within tape: ', desc)
     run((s, conductors) => f(s, t, conductors))
     .catch((err) => {
       try {

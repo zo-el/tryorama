@@ -152,7 +152,9 @@ export const OrchestratorClass = Conductor => class Orchestrator {
   }
 
   runScenario = async scenario => {
+    logger.debug("Refreshing waiter...")
     await this.refreshWaiter()
+    logger.debug("...waiter refreshed")
     const modifiedScenario = this.middleware(scenario)
 
     let conductorMap: ConductorMap = {}
@@ -233,19 +235,18 @@ export const OrchestratorClass = Conductor => class Orchestrator {
     logger.info("Waiting for all conductors to connect.")
     logger.info("Conductors in config: %j", Object.keys(this.conductorConfigs))
     await this.haveAllConductors
-    logger.info("We have all conductors we need. Starting scenarios.")
+    logger.info("We have all conductors we need. Starting scenarios...")
 
     const onlyTests = this.scenarios.filter(([desc, execute, only]) => only)
+    const tests = onlyTests.length > 0 ? onlyTests : this.scenarios
 
+    logger.debug("About to execute %d tests", tests.length)
     if (onlyTests.length > 0) {
       logger.warn(`.only was invoked, only running ${onlyTests.length} test(s)!`)
-      for (const [desc, execute, _] of onlyTests) {
-        await execute()
-      }
-    } else {
-      for (const [desc, execute, _] of this.scenarios) {
-        await execute()
-      }
+    }
+    for (const [desc, execute, _] of tests) {
+      logger.debug("Executing test: %s", desc)
+      await execute()
     }
     this.close()
   }
