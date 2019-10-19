@@ -28,14 +28,14 @@ export class Conductor {
   conductorTimeoutMs: number
   logger: any
 
-  _ports: { adminPort: number, zomePort: number }
+  _sockets: { adminSocket: string, zomeSocket: string }
   _handle: Mortal
   _hcConnect: any
   _isInitialized: boolean
   _wsClosePromise: Promise<void>
   _conductorTimer: any
 
-  constructor({ name, handle, onSignal, adminPort, zomePort }) {
+  constructor({ name, handle, onSignal, adminSocket, zomeSocket }) {
     this.name = name
     this.logger = makeLogger(`try-o-rama conductor ${name}`)
     this.logger.debug("Conductor constructing")
@@ -43,7 +43,7 @@ export class Conductor {
     this.zomeCallTimeoutMs = DEFAULT_ZOME_CALL_TIMEOUT
     this.conductorTimeoutMs = DEFAULT_CONDUCTOR_ACTIVITY_TIMEOUT
 
-    this._ports = { adminPort, zomePort }
+    this._sockets = { adminSocket, zomeSocket }
     this._handle = handle
     this._hcConnect = hcWebClient.connect
     this._isInitialized = false
@@ -84,15 +84,18 @@ export class Conductor {
 
   _connectAdmin = async () => {
     this._restartTimer()
-    const url = this._adminInterfaceUrl()
-    this.logger.debug(`connectAdmin :: connecting to ${url}`)
-    const { call, onSignal, ws } = await this._hcConnect({ url })
+    const file = this._sockets.adminSocket
+    this.logger.debug(`connectAdmin :: connecting to ${file}`)
+    const { call, onSignal } = await this._hcConnect({ type: 'unix', path: file })
+
+    console.warn("TODO: detect closing of domain socket")
 
     this._wsClosePromise = (
       // Wait for a constant delay and for websocket to close, whichever happens *last*
       Promise.all([
-        new Promise(resolve => ws.on('close', resolve)),
-        delay(WS_CLOSE_DELAY_FUDGE),
+        // new Promise(resolve => ws.on('close', resolve)),
+        // delay(WS_CLOSE_DELAY_FUDGE),
+        delay(100000)
       ]).then(() => {
         this._clearTimer()
       })
@@ -144,9 +147,9 @@ export class Conductor {
 
   _connectZome = async () => {
     this._restartTimer()
-    const url = this._zomeInterfaceUrl()
-    this.logger.debug(`connectZome :: connecting to ${url}`)
-    const { callZome, onSignal } = await this._hcConnect({ url })
+    const file = this._sockets.zomeSocket
+    this.logger.debug(`connectZome :: connecting to ${file}`)
+    const { callZome, onSignal } = await this._hcConnect({ type: 'unix', path: file })
 
     this.callZome = (instanceId, zomeName, fnName, params) => new Promise((resolve, reject) => {
       this._restartTimer()
@@ -185,7 +188,4 @@ export class Conductor {
       }).catch(reject)
     })
   }
-
-  _adminInterfaceUrl = () => `ws://localhost:${this._ports.adminPort}`
-  _zomeInterfaceUrl = () => `ws://localhost:${this._ports.zomePort}`
 }

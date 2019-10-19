@@ -102,21 +102,16 @@ export const getConfigPath = configDir => path.join(configDir, 'conductor-config
  * when multiple conductors are attempting to secure ports for their interfaces.
  * In the future it would be great to move to domain socket based interfaces.
  */
-export const defaultGenConfigArgs = async (conductorName: string, uuid: string) => {
-  const adminPort = await getPort()
+export const defaultGenConfigArgs = async (conductorName: string, uuid: string): Promise<T.GenConfigArgs> => {
   const configDir = await tempDir()
-  let zomePort = adminPort
-  while (zomePort == adminPort) {
-    zomePort = await getPort()
-  }
-  return { conductorName, configDir, adminPort, zomePort, uuid }
+  const adminSocket = path.join(configDir, 'admin.sock')
+  const zomeSocket = path.join(configDir, 'zome.sock')
+  return { conductorName, configDir, adminSocket, zomeSocket, uuid }
 }
 
 
 /**
  * Helper function to generate, from a simple object, a function that returns valid TOML config.
- * 
- * TODO: move debugLog into ConductorConfig
  */
 export const genConfig = (inputConfig: T.AnyConductorConfig, g: T.GlobalConfig): T.GenConfigFn => {
   if (typeof inputConfig === 'function') {
@@ -167,7 +162,7 @@ export const makeTestAgent = (id, { conductorName, uuid }: T.GenConfigArgs) => (
   test_agent: true,
 })
 
-export const genInstanceConfig = async ({ instances }, { configDir, adminPort, zomePort, uuid }) => {
+export const genInstanceConfig = async ({ instances }, { configDir, adminSocket, zomeSocket, uuid }) => {
 
   const config: any = {
     agents: [],
@@ -180,8 +175,8 @@ export const genInstanceConfig = async ({ instances }, { configDir, adminPort, z
     admin: true,
     id: ADMIN_INTERFACE_ID,
     driver: {
-      type: 'websocket',
-      port: adminPort,
+      type: 'unix_socket',
+      path: adminSocket,
     },
     instances: []
   }
@@ -189,8 +184,8 @@ export const genInstanceConfig = async ({ instances }, { configDir, adminPort, z
   const zomeInterface = {
     id: ZOME_INTERFACE_ID,
     driver: {
-      type: 'websocket',
-      port: zomePort,
+      type: 'unix_socket',
+      path: zomeSocket,
     },
     instances: [] as Array<{ id: string }>
   }

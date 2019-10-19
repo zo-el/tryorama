@@ -29,8 +29,8 @@ export type GenConfigArgs = {
   conductorName: string,
   configDir: string,
   uuid: string,
-  adminPort: number,
-  zomePort: number,
+  adminSocket: string,
+  zomeSocket: string,
 }
 
 export const AgentConfigV = t.intersection([
