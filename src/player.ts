@@ -183,7 +183,8 @@ export class Player {
         // because the consumer of this function needs those interfaces
         // to be started so that it can initiate, and form,
         // the websocket connections
-        if (data.toString('utf8').indexOf('Starting interfaces...') >= 0) {
+        const line = data.toString('utf8')
+        if (line.indexOf('Done. All interfaces started.') >= 0) {
           this.logger.info(`Conductor '${name}' process spawning successful`)
           resolve(handle)
         }

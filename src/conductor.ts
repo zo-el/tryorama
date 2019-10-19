@@ -86,16 +86,14 @@ export class Conductor {
     this._restartTimer()
     const file = this._sockets.adminSocket
     this.logger.debug(`connectAdmin :: connecting to ${file}`)
-    const { call, onSignal } = await this._hcConnect({ type: 'unix', path: file })
-
-    console.warn("TODO: detect closing of domain socket")
+    const { call, onSignal, socket } = await this._hcConnect({ type: 'unix', path: file })
+    this.logger.info(`Connected to UNIX socket: ${file}`)
 
     this._wsClosePromise = (
       // Wait for a constant delay and for websocket to close, whichever happens *last*
       Promise.all([
-        // new Promise(resolve => ws.on('close', resolve)),
-        // delay(WS_CLOSE_DELAY_FUDGE),
-        delay(100000)
+        new Promise(resolve => socket.on('close', resolve)),
+        delay(WS_CLOSE_DELAY_FUDGE),
       ]).then(() => {
         this._clearTimer()
       })
@@ -150,6 +148,7 @@ export class Conductor {
     const file = this._sockets.zomeSocket
     this.logger.debug(`connectZome :: connecting to ${file}`)
     const { callZome, onSignal } = await this._hcConnect({ type: 'unix', path: file })
+    this.logger.info(`Connected to UNIX socket: ${file}`)
 
     this.callZome = (instanceId, zomeName, fnName, params) => new Promise((resolve, reject) => {
       this._restartTimer()
