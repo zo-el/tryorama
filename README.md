@@ -44,7 +44,7 @@ const mainConfig = Config.gen(
   }
 })
 
-// Instatiate a test orchestrator.
+// Instantiate a test orchestrator.
 // It comes loaded with a lot default behavior which can be overridden, including:
 // * custom conductor spawning
 // * custom test result reporting
