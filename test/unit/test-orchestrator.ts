@@ -15,7 +15,7 @@ test('Scenario API constructed properly', async t => {
   orchestrator.run()
 })
 
-test.only('API onFail gets called', async t => {
+test('API onFail gets called', async t => {
   t.plan(1)
   const spy = sinon.spy()
   const orchestrator = testOrchestrator()
