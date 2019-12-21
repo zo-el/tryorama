@@ -30,16 +30,15 @@ export type IntermediateConfig = RawConductorConfig  // TODO: constrain
 
 export type ConfigSeed = (args: ConfigSeedArgs) => Promise<IntermediateConfig>
 
-export type PartialConfigSeedArgs = {
+export type ConfigSeedArgs = {
+  scenarioName: string,
+  playerName: string,
+  uuid: string,
   interfacePort: number,
   configDir: string,
 }
 
-export type ConfigSeedArgs = PartialConfigSeedArgs & {
-  scenarioName: string,
-  playerName: string,
-  uuid: string,
-}
+export type PartialConfigSeedArgs = Pick<ConfigSeedArgs, 'interfacePort' | 'configDir'>
 
 export type AnyConfigBuilder = ConfigSeed | EitherInstancesConfig
 export type PlayerConfigs = ObjectS<ConfigSeed> | Array<ConfigSeed>
