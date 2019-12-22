@@ -60,6 +60,12 @@ export const DryInstanceConfigV = t.intersection([
 ])
 export type DryInstanceConfig = t.TypeOf<typeof DryInstanceConfigV>
 
+/** This one's tricky. Since tryorama 0.0.1, we have accepted just a DNA config in this position.
+ *  Now, we want to accept other fields too, in which case the DNA config will be behind a "dna" key,
+ *  along side other instance config like e.g. "storage"
+ */
+export const SugaredInstanceConfigV = t.union([DnaConfigV, DryInstanceConfigV])
+export type SugaredInstanceConfig = t.TypeOf<typeof SugaredInstanceConfigV>
 
 /** Base representation of a Conductor */
 export const DryInstancesConfigV = t.array(DryInstanceConfigV)
@@ -68,7 +74,7 @@ export type DryInstancesConfig = t.TypeOf<typeof DryInstancesConfigV>
 /** Shorthand representation of a Conductor,
  *  where keys of `instance` are used as instance IDs as well as agent IDs
  */
-export const SugaredInstancesConfigV = t.record(t.string, DnaConfigV)
+export const SugaredInstancesConfigV = t.record(t.string, SugaredInstanceConfigV)
 export type SugaredInstancesConfig = t.TypeOf<typeof SugaredInstancesConfigV>
 
 /** For situations where we can accept either flavor of config */
