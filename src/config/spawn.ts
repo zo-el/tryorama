@@ -32,7 +32,7 @@ export const spawnLocal: T.SpawnConductorFn = async (player: Player, { handleHoo
     const version = execSync(`${binPath} --version`)
     logger.info("Using conductor path: %s", binPath)
     logger.info("Holochain version: %s", version)
-    handle = spawn(binPath, ['-c', configPath], {
+    handle = spawn('vtune' , ['-collect', 'hotspots', '--', binPath, '-c', configPath], {
       env: {
         "N3H_QUIET": "1",
         "RUST_BACKTRACE": "1",
