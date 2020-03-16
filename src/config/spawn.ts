@@ -2,6 +2,7 @@
 import { spawn, execSync, ChildProcess } from "child_process";
 import { Ws } from 'ws'
 import axios from "axios"
+import * as fs  from "fs";
 
 import logger, { makeLogger } from "../logger";
 import * as T from '../types'
@@ -32,6 +33,14 @@ export const spawnLocal: T.SpawnConductorFn = async (player: Player, { handleHoo
     const version = execSync(`${binPath} --version`)
     logger.info("Using conductor path: %s", binPath)
     logger.info("Holochain version: %s", version)
+    handle = spawn(binPath, ['-c', configPath, '--structured', 'Json'], {
+      env: {
+        "N3H_QUIET": "1",
+        "RUST_BACKTRACE": "1",
+        ...process.env,
+      }
+    })
+    /*
     if(name == '0') {
     handle = spawn('vtune' , ['-collect', 'hotspots', '-r', '/home/freesig/fast/' + player.name, '--', binPath, '-c', configPath], {
       env: {
@@ -50,8 +59,13 @@ export const spawnLocal: T.SpawnConductorFn = async (player: Player, { handleHoo
     })
 
    }
+   */
+  const now = Date.now();
 
+    var logStream = fs.createWriteStream('/home/freesig/fast/' + player.name + now + '.json');
     let plainLogger = makeLogger()
+
+    handle.stdout.pipe(logStream);
 
     handle.stdout.on('data', data => plainLogger.info(getFancy(`[[[CONDUCTOR ${name}]]]\n${data.toString('utf8')}`)))
     handle.stderr.on('data', data => plainLogger.info(getFancy(`{{{CONDUCTOR ${name}}}}\n${data.toString('utf8')}`)))
