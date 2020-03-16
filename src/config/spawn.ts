@@ -63,7 +63,7 @@ export const spawnLocal: T.SpawnConductorFn = async (player: Player, { handleHoo
   const now = Date.now();
 
     const homedir = require('os').homedir();
-    var logStream = fs.createWriteStream(homedir + '/fast/holochan_logs/' + player.name + '-' + now + '.json');
+    var logStream = fs.createWriteStream(homedir + '/fast/holochain_logs/' + player.name + '-' + now + '.json');
     let plainLogger = makeLogger()
 
     handle.stdout.pipe(logStream);
