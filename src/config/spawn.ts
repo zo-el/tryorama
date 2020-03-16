@@ -62,7 +62,7 @@ export const spawnLocal: T.SpawnConductorFn = async (player: Player, { handleHoo
    */
   const now = Date.now();
 
-    var logStream = fs.createWriteStream('$HOME/fast/' + player.name + now + '.json');
+    var logStream = fs.createWriteStream('~/fast/' + player.name + now + '.json');
     let plainLogger = makeLogger()
 
     handle.stdout.pipe(logStream);
