@@ -112,6 +112,8 @@ export class Player {
     })
   }
 
+  getMeta = (id: string, hash: string): Promise<any> => this.instance(id).getMeta(hash)
+
   /**
    * Get a particular Instance of this conductor.
    * The reason for supplying a getter rather than allowing direct access to the collection

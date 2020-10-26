@@ -1,5 +1,4 @@
 import { AdminApi } from '@holochain/conductor-api'
-
 type CallZomeFunc = (zome: string, fn: string, params: any) => Promise<any>
 
 type InstanceConstructorParams = {
@@ -42,5 +41,13 @@ export class Instance {
   stateDump = (): Promise<any> => {
     return Promise.resolve('TODO')
     // return this.admin.stateDump({ cell_id: this.id })
+  }
+
+  getMeta = (...args): Promise<any> => {
+    const [hash] = args
+    if (args.length !== 1 || typeof hash !== 'string') {
+      throw new Error("instance.getMeta() takes 1 argument: (hash)")
+    }
+    return this._callAdmin('admin/instance/get_meta', {id: this.id, hash: hash})
   }
 }

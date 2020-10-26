@@ -67,7 +67,7 @@ module.exports = (testOrchestrator, testConfig) => {
   test.skip('late joiners', async t => {
     const C = testConfig()
     const orchestrator = testOrchestrator()
-    orchestrator.registerScenario('attempted call with unspawned conductor', async s => {
+    orchestrator.registerScenario('late joiners', async s => {
       const { alice } = await s.players({ alice: C.alice }, true)
 
       const commit1 = await alice.call('app', 'main', 'commit_entry', {
@@ -83,11 +83,16 @@ module.exports = (testOrchestrator, testConfig) => {
         base: hash1,
         target: hash2,
       })
+    
       const linkHash = linkResult.Ok
-      await s.consistency()
 
       // bob and carol join later
       const { bob, carol } = await s.players({ bob: C.bob, carol: C.carol }, true)
+
+      // wait for DHT consistency
+      if (!await s.simpleConsistency("app", [alice, bob, carol])) {
+        t.fail("failed to reach consistency")
+      }
 
       // after the consistency waiting inherent in auto-spawning the new players, their state dumps
       // should immediately show that they are holding alice's entries
@@ -108,8 +113,8 @@ module.exports = (testOrchestrator, testConfig) => {
         base: hash1
       })
 
-      t.equal(bobLinks.Ok.links.length, 1)
-      t.equal(carolLinks.Ok.links.length, 1)
+      t.equal(bobLinks.Ok.links.length, 1)      
+      t.equal(carolLinks.Ok.links.length, 1)      
     })
 
     const stats = await orchestrator.run()
